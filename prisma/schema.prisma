@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PARENT
+  CAREGIVER
+  KID
+}
+
+enum AssignmentStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role     @default(PARENT)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  householdMembers HouseholdMember[]
+  kidProfile    Kid?     @relation("KidLoginUser")
+}
+
+model Household {
+  id          String   @id @default(cuid())
+  name        String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  members     HouseholdMember[]
+  kids        Kid[]
+  chores      Chore[]
+  rewards     Reward[]
+  pointLedger PointLedger[]
+}
+
+model HouseholdMember {
+  id          String   @id @default(cuid())
+  householdId String
+  userId      String
+  memberRole  Role
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([householdId, userId])
+}
+
+model Kid {
+  id             String   @id @default(cuid())
+  householdId    String
+  loginUserId    String?  @unique
+  name           String
+  age            Int?
+  grade          String?
+  interests      String[]
+  notes          String?
+  themeColor     String   @default("#7DD3FC")
+  pointsBalance  Int      @default(0)
+  lifetimePoints Int      @default(0)
+  level          String   @default("Explorer")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  household      Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  loginUser      User?     @relation("KidLoginUser", fields: [loginUserId], references: [id])
+  assignments    ChoreAssignment[]
+  redemptions    RewardRedemption[]
+  achievements   KidAchievement[]
+  ledgerEntries  PointLedger[]
+}
+
+model Chore {
+  id          String   @id @default(cuid())
+  householdId String
+  title       String
+  description String?
+  difficulty  String?
+  pointValue  Int      @default(5)
+  recurrence  String?
+  dueAt       DateTime?
+  reminderAt  DateTime?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  assignments ChoreAssignment[]
+}
+
+model ChoreAssignment {
+  id           String           @id @default(cuid())
+  choreId      String
+  kidId        String
+  status       AssignmentStatus @default(PENDING)
+  completedAt  DateTime?
+  approvedAt   DateTime?
+  approvedById String?
+  chore        Chore @relation(fields: [choreId], references: [id], onDelete: Cascade)
+  kid          Kid   @relation(fields: [kidId], references: [id], onDelete: Cascade)
+
+  @@unique([choreId, kidId])
+}
+
+model PointLedger {
+  id          String   @id @default(cuid())
+  householdId String
+  kidId       String
+  delta       Int
+  reason      String
+  sourceType  String
+  sourceId    String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  kid         Kid       @relation(fields: [kidId], references: [id], onDelete: Cascade)
+}
+
+model Reward {
+  id          String   @id @default(cuid())
+  householdId String
+  title       String
+  costPoints  Int
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  redemptions RewardRedemption[]
+}
+
+model RewardRedemption {
+  id        String   @id @default(cuid())
+  rewardId  String
+  kidId     String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  reward    Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  kid       Kid    @relation(fields: [kidId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  title       String
+  description String?
+  badgeIcon   String?
+  createdAt   DateTime @default(now())
+  kids        KidAchievement[]
+}
+
+model KidAchievement {
+  id            String   @id @default(cuid())
+  kidId         String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  kid           Kid         @relation(fields: [kidId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([kidId, achievementId])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String @unique
+  userId       String
+  expires      DateTime
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+}
+
+model VerificationToken {
+  identifier String
+  token      String @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+}
