@@ -49,7 +49,7 @@ function stringToColor(name?: string): string {
     "#7e22ce", "#1d4ed8", "#16a34a", "#d97706",
     "#db2777", "#0891b2", "#9333ea", "#2563eb",
   ];
-  return colors[Math.abs(hash) % colors.length];
+  return colors[Math.abs(hash) % colors.length] ?? "#7e22ce";
 }
 
 export function Avatar({

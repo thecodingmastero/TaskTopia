@@ -4,6 +4,7 @@ import { useState } from "react";
 import { clsx } from "clsx";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Badge } from "@/components/ui/Badge";
+import { isWorldItemUnlocked } from "@/lib/worldUtils";
 
 const WORLD_ITEMS = [
   { id: "cottage", name: "Cozy Cottage", emoji: "🏡", category: "Buildings", unlocked: true, completedAt: 0 },
@@ -34,7 +35,7 @@ export default function WorldPage() {
   );
 
   const unlockedCount = WORLD_ITEMS.filter(
-    (i) => i.unlocked || (i.requiredChores && COMPLETED_CHORES >= i.requiredChores)
+    (i) => isWorldItemUnlocked(i, COMPLETED_CHORES)
   ).length;
 
   const nextUnlock = WORLD_ITEMS.find(
@@ -117,9 +118,7 @@ export default function WorldPage() {
         {/* World grid */}
         <div className="grid grid-cols-3 gap-3">
           {filtered.map((item) => {
-            const isUnlocked =
-              item.unlocked ||
-              (item.requiredChores !== undefined && COMPLETED_CHORES >= item.requiredChores);
+            const isUnlocked = isWorldItemUnlocked(item, COMPLETED_CHORES);
 
             return (
               <button

@@ -167,18 +167,16 @@ export default function ParentDashboardPage() {
                       />
                     </div>
 
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
                         Today: {kid.completedToday}/{kid.totalToday} chores
                       </span>
-                      <div className="h-2 w-20 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-green-400 transition-[width]"
-                          style={{
-                            width: kid.totalToday > 0
-                              ? `${(kid.completedToday / kid.totalToday) * 100}%`
-                              : "0%",
-                          }}
+                      <div className="flex-1">
+                        <ProgressBar
+                          value={kid.completedToday}
+                          max={kid.totalToday > 0 ? kid.totalToday : 1}
+                          color="green"
+                          size="xs"
                         />
                       </div>
                     </div>

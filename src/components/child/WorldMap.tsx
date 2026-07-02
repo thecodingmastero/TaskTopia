@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { isWorldItemUnlocked } from "@/lib/worldUtils";
 
 interface WorldItem {
   id: string;
@@ -33,7 +34,7 @@ export function WorldMap({
   className,
 }: WorldMapProps) {
   const worldItems = items ?? defaultItems;
-  const unlocked = worldItems.filter((i) => i.unlocked || (i.requiredChores && completedChores >= i.requiredChores));
+  const unlocked = worldItems.filter((i) => isWorldItemUnlocked(i, completedChores));
 
   return (
     <div className={clsx("rounded-2xl overflow-hidden", className)}>
@@ -65,9 +66,7 @@ export function WorldMap({
         {/* World grid */}
         <div className="grid grid-cols-4 gap-2 mt-2">
           {worldItems.map((item) => {
-            const isUnlocked =
-              item.unlocked ||
-              (item.requiredChores !== undefined && completedChores >= item.requiredChores);
+            const isUnlocked = isWorldItemUnlocked(item, completedChores);
 
             return (
               <div

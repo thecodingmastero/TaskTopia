@@ -66,11 +66,15 @@ export default function ChoresPage() {
     return true;
   });
 
-  const todoPct = Math.round(
-    (ALL_CHORES.filter((c) => c.status === "approved" || completedIds.has(c.id)).length /
-      ALL_CHORES.length) *
-      100
-  );
+  const todoPct =
+    ALL_CHORES.length === 0
+      ? 0
+      : Math.round(
+          (ALL_CHORES.filter((c) => c.status === "approved" || completedIds.has(c.id))
+            .length /
+            ALL_CHORES.length) *
+            100
+        );
 
   return (
     <>
