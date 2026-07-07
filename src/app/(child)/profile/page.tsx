@@ -122,7 +122,7 @@ export default function ProfilePage() {
 
         {/* Sign out */}
         <div className="pb-4">
-          <form action="/auth/signout" method="post">
+          <form action="/api/auth/signout" method="post">
             <button
               type="submit"
               className="w-full py-3 rounded-2xl border-2 border-red-200 dark:border-red-900/50 text-red-500 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
